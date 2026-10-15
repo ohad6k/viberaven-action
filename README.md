@@ -49,6 +49,6 @@ select schemaname, tablename from pg_tables
 where schemaname = 'public' and rowsecurity = false;
 ```
 
-A clean result does not prove the app is secure. Same check locally: `npx -y viberaven@1.6.3 check`.
+A clean result does not prove the app is secure. Same check locally: `npx -y viberaven@1.6.12 check`.
 
 More: https://viberaven.dev

@@ -7,7 +7,7 @@ branding:
 inputs:
   version:
     description: 'viberaven npm version to run'
-    default: '1.6.3'
+    default: '1.6.12'
   fail-on-blockers:
     description: 'Fail the job when the check finds a blocker (advice only by default)'
     default: 'false'
@@ -41,6 +41,7 @@ runs:
         else
           { echo '<!-- viberaven-check -->'; echo '### VibeRaven launch check'; echo; echo '```text'; npx -y "viberaven@$VR_VERSION" check . || code=$?; echo '```'; } > viberaven-check.md 2>&1
         fi
+        { echo; echo '<sub>Checked by [VibeRaven](https://github.com/ohad6k/VibeRaven) (open source). Fix a finding with your own coding agent at [viberaven.dev](https://viberaven.dev/try?utm_source=github-action).</sub>'; } >> viberaven-check.md
         cat viberaven-check.md >> "$GITHUB_STEP_SUMMARY"
         echo "code=$code" >> "$GITHUB_OUTPUT"
     - if: inputs.comment == 'true'

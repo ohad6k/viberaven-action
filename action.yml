@@ -7,7 +7,7 @@ branding:
 inputs:
   version:
     description: 'viberaven npm version to run'
-    default: '1.7.7'
+    default: '1.7.8'
   fail-on-blockers:
     description: 'Fail the job when the check finds a blocker (advice only by default)'
     default: 'false'

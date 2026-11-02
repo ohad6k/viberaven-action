@@ -7,7 +7,7 @@ branding:
 inputs:
   version:
     description: 'viberaven npm version to run'
-    default: '1.6.12'
+    default: '1.7.7'
   fail-on-blockers:
     description: 'Fail the job when the check finds a blocker (advice only by default)'
     default: 'false'
@@ -17,6 +17,9 @@ inputs:
   token:
     description: 'Token used to comment'
     default: ${{ github.token }}
+  sarif:
+    description: 'Upload findings to GitHub code scanning so they show on the changed lines (needs security-events: write; skipped quietly without it)'
+    default: 'true'
 outputs:
   exit-code:
     description: '1 when blockers were found, 0 otherwise'
@@ -59,6 +62,24 @@ runs:
         elif [ "${{ steps.check.outputs.code }}" = "1" ]; then
           gh api --method POST "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/comments" -F body=@viberaven-check.md >/dev/null || true
         fi
+    - id: sarif
+      if: inputs.sarif == 'true'
+      shell: bash
+      env:
+        VR_VERSION: ${{ inputs.version }}
+      run: |
+        # SARIF needs viberaven 1.7.7 or later; an older pinned version skips the upload instead of failing.
+        if npx -y "viberaven@$VR_VERSION" check . --format sarif > viberaven.sarif 2>/dev/null || [ -s viberaven.sarif ]; then
+          node -e "JSON.parse(require('fs').readFileSync('viberaven.sarif','utf8'))" 2>/dev/null && echo "ready=true" >> "$GITHUB_OUTPUT" || echo "ready=false" >> "$GITHUB_OUTPUT"
+        else
+          echo "ready=false" >> "$GITHUB_OUTPUT"
+        fi
+    - if: inputs.sarif == 'true' && steps.sarif.outputs.ready == 'true'
+      uses: github/codeql-action/upload-sarif@v3
+      continue-on-error: true
+      with:
+        sarif_file: viberaven.sarif
+        category: viberaven
     - if: inputs.fail-on-blockers == 'true' && steps.check.outputs.code == '1'
       shell: bash
       run: exit 1

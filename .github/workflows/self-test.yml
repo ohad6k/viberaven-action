@@ -29,3 +29,4 @@ jobs:
           test "${{ steps.vr.outputs.exit-code }}" = "1"
           grep -q rls_disabled viberaven-check.md
           grep -q service_role_key_in_client_env viberaven-check.md
+          node -e "const s=JSON.parse(require('fs').readFileSync('viberaven.sarif','utf8')); const ids=s.runs[0].results.map(r=>r.ruleId); if(!ids.includes('rls_disabled')) process.exit(1)"

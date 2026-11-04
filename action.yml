@@ -56,7 +56,9 @@ runs:
       run: |
         if [ -n "$PR" ]; then
           [ "$HEAD_REPO" = "$GITHUB_REPOSITORY" ] || exit 0
-          id=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate --jq '.[] | select(.body | contains("<!-- viberaven-check -->")) | .id' | tail -n 1)
+          author=$(gh api graphql -f 'query={ viewer { login } }' --jq '.data.viewer.login | select(type == "string" and length > 0) | @json')
+          if [ -z "$author" ]; then echo 'Could not identify the comment token actor; no comment was changed.' >&2; exit 1; fi
+          id=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate --jq ".[] | select(.user.login == $author and (.body | contains(\"<!-- viberaven-check -->\"))) | .id" | tail -n 1)
           if [ -n "$id" ]; then gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F body=@viberaven-check.md >/dev/null
           else gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body-file viberaven-check.md; fi
         elif [ "${{ steps.check.outputs.code }}" = "1" ]; then

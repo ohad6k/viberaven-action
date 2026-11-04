@@ -72,7 +72,7 @@ runs:
       run: |
         # SARIF needs viberaven 1.7.7 or later; an older pinned version skips the upload instead of failing.
         if npx -y "viberaven@$VR_VERSION" check . --format sarif > viberaven.sarif 2>/dev/null || [ -s viberaven.sarif ]; then
-          node -e "JSON.parse(require('fs').readFileSync('viberaven.sarif','utf8'))" 2>/dev/null && echo "ready=true" >> "$GITHUB_OUTPUT" || echo "ready=false" >> "$GITHUB_OUTPUT"
+          node "$GITHUB_ACTION_PATH/scripts/prepare-code-scanning.mjs" viberaven.sarif viberaven-code-scanning.sarif && echo "ready=true" >> "$GITHUB_OUTPUT" || echo "ready=false" >> "$GITHUB_OUTPUT"
         else
           echo "ready=false" >> "$GITHUB_OUTPUT"
         fi
@@ -80,7 +80,7 @@ runs:
       uses: github/codeql-action/upload-sarif@v3
       continue-on-error: true
       with:
-        sarif_file: viberaven.sarif
+        sarif_file: viberaven-code-scanning.sarif
         category: viberaven
     - if: inputs.fail-on-blockers == 'true' && steps.check.outputs.code == '1'
       shell: bash

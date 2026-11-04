@@ -3,12 +3,15 @@ on: [push, pull_request]
 jobs:
   clean:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v5
       - id: vr
         uses: ./
         with:
-          comment: 'false'
+          comment: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
   finds-blockers:
     runs-on: ubuntu-latest
     steps:

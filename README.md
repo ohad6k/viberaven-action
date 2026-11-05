@@ -13,6 +13,8 @@ Advice, not a gate. Analysis runs on your runner. Enabled comments and code-scan
 
 ## Use it
 
+Have two Supabase migration PRs coming up? Try the [read-only migration review pilot](https://github.com/ohad6k/viberaven-action/issues/7).
+
 Lovable and Bolt push straight to `main`, so run it on pushes as well as pull requests:
 
 ```yaml
